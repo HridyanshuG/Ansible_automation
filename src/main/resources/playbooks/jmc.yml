@@ -1,0 +1,28 @@
+---
+- name: Run jcmd as nxportal user, capture PID and start JFR recording (60 seconds)
+  hosts: all
+  become: true
+  collections:
+    - community.general
+  tasks:
+    - name: Run jcmd with shell module
+      shell: "sudo -u nxportal jcmd"
+      register: jcmd_output
+    - name: Parse PID from jcmd output
+      set_fact:
+        process_id: "{{ jcmd_output.stdout.split()[0] }}"  # Assuming PID is 1st element
+    - name: Print captured process ID
+      debug:
+        msg: "Captured process ID: {{ process_id }}"
+    - name: Start JFR recording with 60 seconds duration
+      shell: "sudo -u nxportal jcmd {{ process_id }} JFR.start duration=60s filename=/var/nexthink/portal/logsjmc/myrecording.jfr"
+      when: process_id is defined
+    - name: Wait for 60 seconds
+      wait_for:
+          timeout: 60
+    - name: Specifying a path directly
+      ansible.builtin.fetch:
+        src: /var/nexthink/portal/logsjmc/myrecording.jfr
+        dest: /Users/hridyanshu.ghura/Desktop/JMC_result/{{ ansible_host }}_jmc.jfr
+        flat: yes
+

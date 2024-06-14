@@ -1,0 +1,20 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+  - name: totp set to false
+    lineinfile:
+      path: /var/nexthink/portal/conf/portal.conf
+      regexp: '^globalconfig.feature.totp-enabled='
+      line: globalconfig.feature.totp-enabled=false
+    register: totp
+
+  - name: restart portal
+    service:
+      name: nxportal
+      state: restarted
+    when: totp.changed
+
+
+
