@@ -32,7 +32,7 @@ public class AnsibleExecutor {
         String playbookNametemp = "playbooks/" + playbookName;
         // Get playbook file from resources folder
         File playbook = new ClassPathResource(playbookNametemp).getFile();
-        File inventory1 = new ClassPathResource("inventory.ini").getFile();
+        File inventory1 = new ClassPathResource(serverName).getFile();
 
         // Construct the command
         String command = String.format("ansible-playbook %s -i %s", playbook.getAbsolutePath(), inventory1.getAbsolutePath());

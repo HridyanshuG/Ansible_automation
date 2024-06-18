@@ -13,13 +13,11 @@ public class AnsibleService {
     @Autowired
     AnsibleExecutor ansibleExecutor;
 
-    @GetMapping("/playbook/{id}/{target}")
+    @GetMapping("/{id}/{target}")
     public ExecuteResult runPlaybook(@PathVariable("id") String playbook, @PathVariable("target") String target){
         try {
             return ansibleExecutor.execute(playbook, target);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
 

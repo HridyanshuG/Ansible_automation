@@ -10,12 +10,15 @@ public class DevAutomation implements CommandLineRunner{
 
 	@Autowired
 	AnsibleExecutor ansibleExecutor;
+    @Autowired
+    private AnsibleService ansible;
 
 	@Override
 	public void run(String args[]) throws Exception
 	{
-		ExecuteResult result = ansibleExecutor.execute("toggle_totp_false.yml","172.16.47.216");
-		System.out.println(result.isSuccess());
+
+		//ExecuteResult result = ansibleExecutor.execute("toggle_totp_false","172.16.47.216");
+		//System.out.println(result.isSuccess());
 	}
 
 
