@@ -1,5 +1,6 @@
 package com.nexthink.intern.automation;
 
+import org.springframework.context.support.DefaultLifecycleProcessor;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.File;
@@ -19,6 +20,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class AnsibleExecutor {
 
+    private final DefaultLifecycleProcessor lifecycleProcessor;
+
+    public AnsibleExecutor(DefaultLifecycleProcessor lifecycleProcessor) {
+        this.lifecycleProcessor = lifecycleProcessor;
+    }
+
     /**
      * /run the playbook via command line and check the standard output result and set the status
      *
@@ -28,15 +35,23 @@ public class AnsibleExecutor {
      */
     public ExecuteResult execute(String playbookName, String serverName) throws IOException, InterruptedException {
 
+        String playbookPath = System.getProperty("playbookPath");
+        if (playbookPath == null) {
+            throw new IllegalArgumentException("System property 'playbookPath' is not set");
+        }
+
         //prepending the folder playbooks and creating a new name to access it form the resource folder
-        String playbookNametemp = "playbooks/" + playbookName;
+        String playbookNametemp = playbookPath + "/playbook/" + playbookName;
+        String servers1 = playbookPath + "/inventory/" + serverName;
         // Get playbook file from resources folder
-        File playbook = new ClassPathResource(playbookNametemp).getFile();
-        File inventory1 = new ClassPathResource(serverName).getFile();
+        File playbook1 = new File(playbookNametemp);
+        File inventory1 = new File(servers1);
+        //String servers1 = "/Users/hridyanshu.ghura/Desktop/portalautomation/inventory/" + serverName;
+        //File playbook = new ClassPathResource(playbookNametemp).getFile();
+        //File inventory1 = new ClassPathResource(serverName).getFile();
 
         // Construct the command
-        String command = String.format("ansible-playbook %s -i %s", playbook.getAbsolutePath(), inventory1.getAbsolutePath());
-
+        String command = String.format("ansible-playbook %s -i %s", playbook1.getAbsolutePath(), inventory1.getAbsolutePath());
         ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", command);
         Process process = processBuilder.start();
         Scanner standardOutputScanner = new Scanner(process.getInputStream());

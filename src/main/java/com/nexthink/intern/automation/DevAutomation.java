@@ -13,6 +13,10 @@ public class DevAutomation implements CommandLineRunner{
     @Autowired
     private AnsibleService ansible;
 
+	public static void main(String[] args) {
+		SpringApplication.run(DevAutomation.class, args);
+	}
+
 	@Override
 	public void run(String args[]) throws Exception
 	{
@@ -23,8 +27,6 @@ public class DevAutomation implements CommandLineRunner{
 
 
 
-	public static void main(String[] args) {
-		SpringApplication.run(DevAutomation.class, args);
-	}
+
 
 }
