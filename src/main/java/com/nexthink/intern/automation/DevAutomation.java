@@ -20,8 +20,7 @@ public class DevAutomation implements CommandLineRunner{
 	@Override
 	public void run(String args[]) throws Exception
 	{
-
-		//ExecuteResult result = ansibleExecutor.execute("toggle_totp_false","172.16.47.216");
+		//ansibleExecutor.Testjob();
 		//System.out.println(result.isSuccess());
 	}
 

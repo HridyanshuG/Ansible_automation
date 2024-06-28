@@ -1,29 +1,24 @@
 package com.nexthink.intern.automation;
 
-import org.springframework.context.support.DefaultLifecycleProcessor;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
 
 
-import org.springframework.stereotype.Component;
-
-//---------------------------------------
-
-// inject the auto-configured one
-
-
-//---------------------------------------
-
 @Component
 public class AnsibleExecutor {
 
-    private final DefaultLifecycleProcessor lifecycleProcessor;
+    @Autowired
+    JobRepository jobRepository;
 
-    public AnsibleExecutor(DefaultLifecycleProcessor lifecycleProcessor) {
-        this.lifecycleProcessor = lifecycleProcessor;
+    public void Testjob(){
+        Job job = new Job();
+        job.setPlaybook("TEST@");
+        jobRepository.save(job);
+
     }
 
     /**
@@ -35,7 +30,7 @@ public class AnsibleExecutor {
      */
     public ExecuteResult execute(String playbookName, String serverName) throws IOException, InterruptedException {
 
-        String playbookPath = System.getProperty("playbookPath");
+        String playbookPath = System.getenv("playbookPath");
         if (playbookPath == null) {
             throw new IllegalArgumentException("System property 'playbookPath' is not set");
         }
