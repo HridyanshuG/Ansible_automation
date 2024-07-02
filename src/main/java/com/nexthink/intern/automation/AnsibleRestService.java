@@ -45,10 +45,10 @@ public class AnsibleRestService {
         return fileService.getFileNames(folderPath + "/inventory");
     }
     //provides list of targets by their name as specified in the chosen inventory file
-    @GetMapping("/targets")
+    @GetMapping("/targets/{inventoryfile}")
     public List<String> getTargets(@PathVariable String inventoryfile){
 
-        return List.of();
+        return AnsibleInventoryReader.getHostsFromInventory(inventoryfile);
     }
     //main ansible execution class takes inventory file and playbook as parameter and runs it for all the servers in the playbook
     @PostMapping("/execute")

@@ -20,8 +20,7 @@ public class DevAutomation implements CommandLineRunner{
 	@Override
 	public void run(String args[]) throws Exception
 	{
-		//ansibleExecutor.Testjob();
-		//System.out.println(result.isSuccess());
+
 	}
 
 

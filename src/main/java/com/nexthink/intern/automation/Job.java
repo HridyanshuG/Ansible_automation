@@ -1,9 +1,8 @@
 package com.nexthink.intern.automation;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 
 @Entity
 public class Job {
@@ -13,6 +12,20 @@ public class Job {
     private String playbook;
     private String target;
     private String isSuccess;
+    private LocalDateTime startTime;
+
+    @PrePersist
+    public void prePersist() {
+        startTime = LocalDateTime.now();
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
     public String getStatus() {
         return isSuccess;
     }
