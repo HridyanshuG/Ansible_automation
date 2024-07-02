@@ -41,9 +41,7 @@ public class AnsibleExecutor {
         // Get playbook file from resources folder
         File playbook1 = new File(playbookNametemp);
         File inventory1 = new File(servers1);
-        //String servers1 = "/Users/hridyanshu.ghura/Desktop/portalautomation/inventory/" + serverName;
-        //File playbook = new ClassPathResource(playbookNametemp).getFile();
-        //File inventory1 = new ClassPathResource(serverName).getFile();
+
 
         // Construct the command
         String command = String.format("ansible-playbook %s -i %s", playbook1.getAbsolutePath(), inventory1.getAbsolutePath());

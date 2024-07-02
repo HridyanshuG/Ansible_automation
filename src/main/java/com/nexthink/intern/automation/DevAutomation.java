@@ -11,7 +11,7 @@ public class DevAutomation implements CommandLineRunner{
 	@Autowired
 	AnsibleExecutor ansibleExecutor;
     @Autowired
-    private AnsibleService ansible;
+    private AnsibleRestService ansible;
 
 	public static void main(String[] args) {
 		SpringApplication.run(DevAutomation.class, args);
