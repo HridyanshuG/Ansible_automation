@@ -7,6 +7,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
@@ -45,6 +46,8 @@ public class AnsibleRestService {
         return fileService.getFileNames(folderPath + "/inventory");
     }
     //provides list of targets by their name as specified in the chosen inventory file
+
+
     @GetMapping("/targets/{inventoryfile}")
     public List<String> getTargets(@PathVariable String inventoryfile){
 
