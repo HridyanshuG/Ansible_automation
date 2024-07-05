@@ -7,6 +7,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,26 +34,8 @@ public class AnsibleRestService {
     ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     //provides list of playbooks in path specified as per the environment variable playbookPath
-    @GetMapping("/playbooks")
-    public List<String> getPlaybooks() {
-        String folderPath = System.getenv("playbookPath");
-        folderPath = folderPath + "/playbook";
-        return fileService.getFileNames(folderPath);
-    }
     //provides list of inventory files in path specified as per the environment variable playbookPath
-    @GetMapping("/inventory")
-    public List<String> getInventory() {
-        String folderPath = System.getenv("playbookPath");
-        return fileService.getFileNames(folderPath + "/inventory");
-    }
-    //provides list of targets by their name as specified in the chosen inventory file
 
-
-    @GetMapping("/targets/{inventoryfile}")
-    public List<String> getTargets(@PathVariable String inventoryfile){
-
-        return AnsibleInventoryReader.getHostsFromInventory(inventoryfile);
-    }
     //main ansible execution class takes inventory file and playbook as parameter and runs it for all the servers in the playbook
     @PostMapping("/execute")
     public String runPlaybook(@RequestBody PlaybookRequest request) {
@@ -100,26 +83,6 @@ public class AnsibleRestService {
     }
 
 
-    @GetMapping("/jobs/{id}")
-    public JobResult getJob(@PathVariable Long id) {
-        JobResult jobResult = new JobResult();
-        Job currentjob = jobRepository.findById(id).orElseThrow(() -> new RuntimeException("Job not found"));
-        jobResult.setId(id);
-        jobResult.setStatus(currentjob.getStatus());
-        List<Artifacts> artifacts =  buildArtifacts(currentjob);
-        jobResult.setArtifacts(artifacts);
-        return jobResult;
-    }
 
-    private List<Artifacts> buildArtifacts(Job job) {
-        List<Artifacts> artifacts = new ArrayList<>();
-        if(job.getPlaybook().equals("jmc.yml")){
-            Artifacts artifacts1 = new Artifacts();
-            artifacts1.setType("url");
-            artifacts1.setValue("http://localhost:8080/jmc"+job.getId()+"jmc.jfr");
-            artifacts.add(artifacts1);
-        }
-        return artifacts;
-    }
 }
 

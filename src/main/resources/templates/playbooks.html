@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Playbooks</title>
+</head>
+<body>
+<h1>Available Playbooks</h1>
+<ul>
+    <li th:each="playbook : ${playbooks2}" th:text="${playbook}">Playbook name</li>
+</ul>
+</body>
+</html>

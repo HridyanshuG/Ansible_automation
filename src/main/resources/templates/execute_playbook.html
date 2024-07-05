@@ -1,17 +1,15 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <body>
 <h1>V6 Ansible automation</h1>
-<form>
+<form th:action="@{execute}" method="post">
     <label>Playbook</label>
-        <select name="playbook" id="playbook">
-        <option value="jmc.yml">jmc</option>
-        <option value="test1.yml">test1</option>        
-      </select><br/>
+    <select name="playbook" id="playbook">
+        <option th:each="playbook : ${playbooks}" th:value="${playbook}" th:text="${playbook}"></option>
+    </select><br/>
     <label>Target</label>
-      <select name="target" id="target">
-      <option value="dev1">dev1</option>
-      <option value="dev2">dev2</option>        
+    <select name="target" id="target">
+        <option th:each="target : ${inventory}" th:value="${target}" th:text="${target}"></option>
     </select><br/>
     <input type="submit" value="Execute"></input>
 </form>

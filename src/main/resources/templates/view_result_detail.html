@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>View Results</title>
+</head>
+<body>
+
+<h1>V6 Ansible Automation Results</h1>
+
+<table>
+    <tr>
+        <th>Artifact Type</th>
+        <th>Artifact Value</th>
+    </tr>
+    <tr th:each="job : ${globalists}">
+        <td th:text="${job.getType()}"></td>
+        <td th:text="${job.getValue()}"></td>
+    </tr>
+</table>
+</body>
+</html>
