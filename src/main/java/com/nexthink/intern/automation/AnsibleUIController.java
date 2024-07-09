@@ -1,5 +1,7 @@
 package com.nexthink.intern.automation;
 
+import com.nexthink.intern.automation.executor.AnsibleExecutor;
+import com.nexthink.intern.automation.executor.AnsibleExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,60 +20,44 @@ import static com.nexthink.intern.automation.AnsibleInventoryReader.getHostsFrom
 
 @Controller
 public class AnsibleUIController {
-    Logger logger = LoggerFactory.getLogger(AnsibleUIController.class);
-
+    private Logger logger = LoggerFactory.getLogger(AnsibleUIController.class);
     @Autowired
-    AnsibleEnv ansibleEnv;
-
+    private AnsibleEnv ansibleEnv;
     @Autowired
     private AnsibleExecutor ansibleExecutor;
+
     @Autowired
     private FileService fileService;
     @Autowired
     private JobRepository jobRepository;
 
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
-
-    //provides list of playbooks in path specified as per the environment variable playbookPath
-    //provides list of inventory files in path specified as per the environment variable playbookPath
-
-    //main ansible execution class takes inventory file and playbook as parameter and runs it for all the servers in the playbook
+    /**
+     *   provides list of playbooks in path specified as per the environment variable playbookPath
+     *   provides list of inventory files in path specified as per the environment variable playbookPath
+     *   main ansible execution class takes inventory file and playbook as parameter and runs it for all the servers in the playbook
+     */
     @PostMapping("/execute")
     public String runPlaybook(@ModelAttribute ExecutionForm request) {
         logger.info("Starting execution of playbook successfully received request");
         Job job = new Job();
         job.setPlaybook(request.getPlaybook());
         logger.info("Starting execution of playbook successfully received playbook");
-        job.setTarget("inventory.ini");
+        job.setTarget("inventory.ini"); //TODO move to constant INVENTORY_FILE
         String ServerNames = String.join(",", request.getTargets());
         job.setListOfTargets(ServerNames);
         logger.info("Starting execution of playbook successfully received targets");
-        job.setStatus("ongoing");
+        job.setStatus("ongoing"); //TODO move to constant  JOB_STATUS_ONGOING
         Job savedJob = jobRepository.save(job);
         logger.info("Starting execution of playbook successfully saved job");
-        executorService.submit(() -> {
-            try {
-                ExecuteResult result = ansibleExecutor.execute(savedJob.getPlaybook(), savedJob.getListOfTargets());
-
-                if(result.isSuccess()) {
-                    savedJob.setStatus("success");
-                }
-                else {
-                    savedJob.setStatus("failed");
-                }
-                jobRepository.save(savedJob);
-            } catch (Exception e) {
-                savedJob.setStatus("failed");
-                jobRepository.save(savedJob);
-                logger.error(e.getMessage(),e);
-            }
-        });
+        ansibleExecutor.submitJob(savedJob);
         return "redirect:/jobs/"+savedJob.getId();
     }
+
     @GetMapping("/playbooks")
     public String getPlaybooks(Model model) throws IOException {
-        List<String> listPlaybooks =  fileService.getFileNames(Paths.get(ansibleEnv.getFolderPath(),"/playbook").toAbsolutePath().toString());
+        List<String> listPlaybooks =  fileService.getFileNames(Paths.get(ansibleEnv.getRootPath(),"/playbook").toAbsolutePath().toString());
         model.addAttribute("playbooks", listPlaybooks);
         List<String> listInventory =  getHostsFromInventory("inventory.ini");
         model.addAttribute("inventory", listInventory);

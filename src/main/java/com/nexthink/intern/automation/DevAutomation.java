@@ -1,5 +1,7 @@
 package com.nexthink.intern.automation;
 
+import com.nexthink.intern.automation.executor.AnsibleExecutor;
+import com.nexthink.intern.automation.executor.AnsibleExecutorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -16,9 +18,6 @@ public class DevAutomation implements CommandLineRunner {
 	@Autowired
 	private AnsibleEnv ansibleEnv;
 
-	@Autowired
-	private AnsibleExecutor ansibleExecutor;
-
     @Autowired
     private AnsibleRestService ansible;
 
@@ -34,7 +33,7 @@ public class DevAutomation implements CommandLineRunner {
 	public void setupValidation(){
 		String folderPath = System.getenv(AnsibleConstants.PLAYBOOK_PATH);
 		logger.info("folderPath = "+folderPath);
-		ansibleEnv.setFolderPath(folderPath);
+		ansibleEnv.setRootPath(folderPath);
 		if(folderPath == null){
 			throw new RuntimeException(AnsibleConstants.PLAYBOOK_PATH+" environment is not setup");
 		}

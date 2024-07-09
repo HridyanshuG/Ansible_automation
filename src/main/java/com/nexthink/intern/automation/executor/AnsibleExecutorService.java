@@ -1,6 +1,10 @@
-package com.nexthink.intern.automation;
+package com.nexthink.intern.automation.executor;
 
+import com.nexthink.intern.automation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -8,24 +12,50 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
-
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Component
-public class AnsibleExecutor {
+@Profile("prod")
+public class AnsibleExecutorService implements AnsibleExecutor {
+
+    private Logger logger = LoggerFactory.getLogger(AnsibleExecutorService.class);
+
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @Autowired
-    JobRepository jobRepository;
+    private JobRepository jobRepository;
 
+    @Autowired
+    private AnsibleEnv ansibleEnv;
+
+    @Override
+    public void submitJob(Job savedJob) {
+        executorService.submit(() -> {
+            try {
+                ExecuteResult result = execute(savedJob.getPlaybook(), savedJob.getListOfTargets());
+
+                if(result.isSuccess()) {
+                    savedJob.setStatus("success");
+                }
+                else {
+                    savedJob.setStatus("failed");
+                }
+                jobRepository.save(savedJob);
+            } catch (Exception e) {
+                savedJob.setStatus("failed");
+                jobRepository.save(savedJob);
+                logger.error(e.getMessage(),e);
+            }
+        });
+    }
+
+    @Override
     public ExecuteResult execute(String playbookName, String ListOfTargets) throws IOException, InterruptedException {
 
-        String playbookPath = System.getenv("playbookPath");
-        if (playbookPath == null) {
-            throw new IllegalArgumentException("System property 'playbookPath' is not set");
-        }
-
         //prepending the folder playbooks and creating a new name to access it form the resource folder
-        String playbookNametemp = playbookPath + "/playbook/" + playbookName;
-        String servers1 = playbookPath + "/inventory/inventory.ini";
+        String playbookNametemp = ansibleEnv.getRootPath() + "/playbook/" + playbookName;
+        String servers1 = ansibleEnv + "/inventory/inventory.ini";
         // Get playbook file from resources folder
         File playbook1 = new File(playbookNametemp);
         File inventory1 = new File(servers1);

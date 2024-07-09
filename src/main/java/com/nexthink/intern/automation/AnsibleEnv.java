@@ -1,18 +1,17 @@
 package com.nexthink.intern.automation;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AnsibleEnv {
 
-    private String folderPath;
+    private String rootPath;
 
-    public String getFolderPath() {
-        return folderPath;
+    public String getRootPath() {
+        return rootPath;
     }
 
-    public void setFolderPath(String folderPath) {
-        this.folderPath = folderPath;
+    public void setRootPath(String rootPath) {
+        this.rootPath = rootPath;
     }
 }
