@@ -1,7 +1,7 @@
 package com.nexthink.intern.automation;
 
 import com.nexthink.intern.automation.executor.AnsibleExecutor;
-import com.nexthink.intern.automation.executor.AnsibleExecutorService;
+import com.nexthink.intern.automation.util.AnsibleEnv;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ public class AnsibleUIController {
      *   main ansible execution class takes inventory file and playbook as parameter and runs it for all the servers in the playbook
      */
     @PostMapping("/execute")
-    public String runPlaybook(@ModelAttribute ExecutionForm request) {
+    public String runPlaybook(@ModelAttribute ExecutionForm request) throws IOException {
         logger.info("Starting execution of playbook successfully received request");
         Job job = new Job();
         job.setPlaybook(request.getPlaybook());

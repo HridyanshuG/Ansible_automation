@@ -1,7 +1,6 @@
 package com.nexthink.intern.automation;
 
-import com.nexthink.intern.automation.executor.AnsibleExecutor;
-import com.nexthink.intern.automation.executor.AnsibleExecutorService;
+import com.nexthink.intern.automation.util.AnsibleEnv;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;

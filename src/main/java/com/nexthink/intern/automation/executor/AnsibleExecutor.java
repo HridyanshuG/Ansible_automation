@@ -8,5 +8,5 @@ import java.io.IOException;
 public interface AnsibleExecutor {
     void submitJob(Job savedJob);
 
-    ExecuteResult execute(String playbookName, String ListOfTargets) throws IOException, InterruptedException;
+    ExecuteResult execute(Job job);
 }

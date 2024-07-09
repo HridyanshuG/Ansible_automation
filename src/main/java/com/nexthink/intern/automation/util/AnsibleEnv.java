@@ -1,4 +1,4 @@
-package com.nexthink.intern.automation;
+package com.nexthink.intern.automation.util;
 
 import org.springframework.stereotype.Component;
 
