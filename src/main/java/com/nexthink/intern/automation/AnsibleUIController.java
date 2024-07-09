@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -18,6 +19,10 @@ import static com.nexthink.intern.automation.AnsibleInventoryReader.getHostsFrom
 @Controller
 public class AnsibleUIController {
     Logger logger = LoggerFactory.getLogger(AnsibleUIController.class);
+
+    @Autowired
+    AnsibleEnv ansibleEnv;
+
     @Autowired
     private AnsibleExecutor ansibleExecutor;
     @Autowired
@@ -25,12 +30,6 @@ public class AnsibleUIController {
     @Autowired
     private JobRepository jobRepository;
 
-
-//    @GetMapping("/greeting")
-//    public String greeting(@RequestParam(name="name", required=false, defaultValue="World") String name, Model model) {
-//        model.addAttribute("name", name);
-//        return "greeting";
-//    }
 
     ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -72,8 +71,7 @@ public class AnsibleUIController {
     }
     @GetMapping("/playbooks")
     public String getPlaybooks(Model model) throws IOException {
-        String folderPath = System.getenv("playbookPath");
-        List<String> listPlaybooks =  fileService.getFileNames(folderPath+ "/playbook");
+        List<String> listPlaybooks =  fileService.getFileNames(Paths.get(ansibleEnv.getFolderPath(),"/playbook").toAbsolutePath().toString());
         model.addAttribute("playbooks", listPlaybooks);
         List<String> listInventory =  getHostsFromInventory("inventory.ini");
         model.addAttribute("inventory", listInventory);

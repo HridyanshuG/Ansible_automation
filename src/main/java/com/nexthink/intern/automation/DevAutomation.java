@@ -5,11 +5,20 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.logging.Logger;
+
 @SpringBootApplication
-public class DevAutomation implements CommandLineRunner{
+public class DevAutomation implements CommandLineRunner {
+
+	private static Logger logger = Logger.getLogger(DevAutomation.class.getName());
+	@Autowired
+	private AnsibleEnv ansibleEnv;
 
 	@Autowired
-	AnsibleExecutor ansibleExecutor;
+	private AnsibleExecutor ansibleExecutor;
+
     @Autowired
     private AnsibleRestService ansible;
 
@@ -18,9 +27,21 @@ public class DevAutomation implements CommandLineRunner{
 	}
 
 	@Override
-	public void run(String args[]) throws Exception
-	{
+	public void run(String args[]) throws Exception {
+		setupValidation();
+	}
 
+	public void setupValidation(){
+		String folderPath = System.getenv(AnsibleConstants.PLAYBOOK_PATH);
+		logger.info("folderPath = "+folderPath);
+		ansibleEnv.setFolderPath(folderPath);
+		if(folderPath == null){
+			throw new RuntimeException(AnsibleConstants.PLAYBOOK_PATH+" environment is not setup");
+		}
+		if( !Files.exists(Paths.get(folderPath))) {
+			throw new RuntimeException(folderPath +" is not valid");
+		}
+		//TODO handle other path and file validation
 	}
 
 
