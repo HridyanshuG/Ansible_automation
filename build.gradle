@@ -24,6 +24,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.apache.commons:commons-configuration2:2.8.0'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	implementation 'org.ini4j:ini4j:latest.release'
 	runtimeOnly 'com.h2database:h2'
 }
 

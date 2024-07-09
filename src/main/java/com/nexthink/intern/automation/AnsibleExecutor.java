@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 
@@ -14,21 +16,7 @@ public class AnsibleExecutor {
     @Autowired
     JobRepository jobRepository;
 
-    public void Testjob(){
-        Job job = new Job();
-        job.setPlaybook("TEST@");
-        jobRepository.save(job);
-
-    }
-
-    /**
-     * /run the playbook via command line and check the standard output result and set the status
-     *
-     * @param playbookName
-     * @param serverName
-     * @return
-     */
-    public ExecuteResult execute(String playbookName, String serverName) throws IOException, InterruptedException {
+    public ExecuteResult execute(String playbookName, String ListOfTargets) throws IOException, InterruptedException {
 
         String playbookPath = System.getenv("playbookPath");
         if (playbookPath == null) {
@@ -37,14 +25,17 @@ public class AnsibleExecutor {
 
         //prepending the folder playbooks and creating a new name to access it form the resource folder
         String playbookNametemp = playbookPath + "/playbook/" + playbookName;
-        String servers1 = playbookPath + "/inventory/" + serverName;
+        String servers1 = playbookPath + "/inventory/inventory.ini";
         // Get playbook file from resources folder
         File playbook1 = new File(playbookNametemp);
         File inventory1 = new File(servers1);
-
+        List<String> databases = Arrays.asList("db1", "db3");
+        // ansible-playbook playbook name -i inventory file --extra-vars "
+        String ServerNames = String.join(",", databases);
 
         // Construct the command
-        String command = String.format("ansible-playbook %s -i %s", playbook1.getAbsolutePath(), inventory1.getAbsolutePath());
+        String command = String.format("ansible-playbook %s -i %s --limit %s", playbook1.getAbsolutePath(), inventory1.getAbsolutePath(), ListOfTargets);
+
         ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", command);
         Process process = processBuilder.start();
         Scanner standardOutputScanner = new Scanner(process.getInputStream());

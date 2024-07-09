@@ -1,41 +1,86 @@
 package com.nexthink.intern.automation;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import static com.nexthink.intern.automation.AnsibleInventoryReader.getHostsFromInventory;
 
 @Controller
 public class AnsibleUIController {
+    Logger logger = LoggerFactory.getLogger(AnsibleUIController.class);
+    @Autowired
+    private AnsibleExecutor ansibleExecutor;
     @Autowired
     private FileService fileService;
     @Autowired
     private JobRepository jobRepository;
-    @GetMapping("/greeting")
-    public String greeting(@RequestParam(name="name", required=false, defaultValue="World") String name, Model model) {
-        model.addAttribute("name", name);
-        return "greeting";
+
+
+//    @GetMapping("/greeting")
+//    public String greeting(@RequestParam(name="name", required=false, defaultValue="World") String name, Model model) {
+//        model.addAttribute("name", name);
+//        return "greeting";
+//    }
+
+    ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+    //provides list of playbooks in path specified as per the environment variable playbookPath
+    //provides list of inventory files in path specified as per the environment variable playbookPath
+
+    //main ansible execution class takes inventory file and playbook as parameter and runs it for all the servers in the playbook
+    @PostMapping("/execute")
+    public String runPlaybook(@ModelAttribute ExecutionForm request) {
+        logger.info("Starting execution of playbook successfully received request");
+        Job job = new Job();
+        job.setPlaybook(request.getPlaybook());
+        logger.info("Starting execution of playbook successfully received playbook");
+        job.setTarget("inventory.ini");
+        String ServerNames = String.join(",", request.getTargets());
+        job.setListOfTargets(ServerNames);
+        logger.info("Starting execution of playbook successfully received targets");
+        job.setStatus("ongoing");
+        Job savedJob = jobRepository.save(job);
+        logger.info("Starting execution of playbook successfully saved job");
+        executorService.submit(() -> {
+            try {
+                ExecuteResult result = ansibleExecutor.execute(savedJob.getPlaybook(), savedJob.getListOfTargets());
+
+                if(result.isSuccess()) {
+                    savedJob.setStatus("success");
+                }
+                else {
+                    savedJob.setStatus("failed");
+                }
+                jobRepository.save(savedJob);
+            } catch (Exception e) {
+                savedJob.setStatus("failed");
+                jobRepository.save(savedJob);
+                logger.error(e.getMessage(),e);
+            }
+        });
+        return "redirect:/jobs/"+savedJob.getId();
     }
     @GetMapping("/playbooks")
-    public String getPlaybooks(Model model) {
+    public String getPlaybooks(Model model) throws IOException {
         String folderPath = System.getenv("playbookPath");
         List<String> listPlaybooks =  fileService.getFileNames(folderPath+ "/playbook");
         model.addAttribute("playbooks", listPlaybooks);
-        //String folderPath2 = System.getenv("playbookPath");
-        List<String> InventoryList= fileService.getFileNames(folderPath + "/inventory");
-        model.addAttribute("inventory", InventoryList);
+        List<String> listInventory =  getHostsFromInventory("inventory.ini");
+        model.addAttribute("inventory", listInventory);
         return "execute_playbook";
     }
 
-    @GetMapping("/targets/{inventoryfile}")
-    public List<String> getTargets(@PathVariable String inventoryfile){
-        return AnsibleInventoryReader.getHostsFromInventory(inventoryfile);
-    }
+
 
     @GetMapping("/jobs/{id}")
     public String getJob(@PathVariable Long id, Model model) {
@@ -65,6 +110,7 @@ public class AnsibleUIController {
         }
         return artifacts;
     }
+
     @GetMapping("/allJobs")
     public String getJob(Model model) {
         List<Job> jobs = jobRepository.findAll();

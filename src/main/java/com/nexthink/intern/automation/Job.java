@@ -3,6 +3,7 @@ package com.nexthink.intern.automation;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 public class Job {
@@ -13,6 +14,8 @@ public class Job {
     private String target;
     private String isSuccess;
     private LocalDateTime startTime;
+    private String ListOfTargets;
+
 
     @PrePersist
     public void prePersist() {
@@ -55,5 +58,13 @@ public class Job {
 
     public void setTarget(String target) {
         this.target = target;
+    }
+
+    public String getListOfTargets() {
+        return ListOfTargets;
+    }
+
+    public void setListOfTargets(String additionalInfo) {
+        this.ListOfTargets = additionalInfo;
     }
 }
