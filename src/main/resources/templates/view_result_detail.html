@@ -9,7 +9,7 @@
     $(document).ready(() => {
         $.ajax("http://localhost:8080/api/consoleoutput")
             .done((data) => {
-                $("#id").innerHTML(data);
+                $("#output").html(data);
             })
     })
 </script>
