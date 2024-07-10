@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 import static com.nexthink.intern.automation.AnsibleInventoryReader.getHostsFromInventory;
 
 @Controller
+@RequestMapping("/ui")
 public class AnsibleUIController {
     private Logger logger = LoggerFactory.getLogger(AnsibleUIController.class);
     @Autowired

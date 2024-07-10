@@ -15,8 +15,10 @@ import java.io.IOException;
 import java.net.URLConnection;
 import java.util.List;
 
-@RestController("/ansible")
+@RestController()
+@RequestMapping("api")
 public class AnsibleRestService {
+
     Logger logger = LoggerFactory.getLogger(AnsibleRestService.class);
 
     @Autowired
@@ -48,6 +50,11 @@ public class AnsibleRestService {
                 .contentType(MediaType.parseMediaType(mimeType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
                 .body(new FileSystemResource(file));
+    }
+
+    @GetMapping("/consoleoutput")
+    public String consoleOutput() {
+        return "123132131";
     }
 
 
