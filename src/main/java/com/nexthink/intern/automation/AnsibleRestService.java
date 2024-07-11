@@ -1,5 +1,6 @@
 package com.nexthink.intern.automation;
 
+import com.nexthink.intern.automation.executor.AnsibleExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,26 +8,22 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-@RestController("/ansible")
+@RestController()
+@RequestMapping("api")
 public class AnsibleRestService {
+
     Logger logger = LoggerFactory.getLogger(AnsibleRestService.class);
 
     @Autowired
-    private AnsibleExecutor ansibleExecutor;
-    @Autowired
     private JobRepository jobRepository;
+
     @Autowired
     private FileService fileService;
 
@@ -53,6 +50,11 @@ public class AnsibleRestService {
                 .contentType(MediaType.parseMediaType(mimeType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
                 .body(new FileSystemResource(file));
+    }
+
+    @GetMapping("/consoleoutput")
+    public String consoleOutput() {
+        return "123132131";
     }
 
 
