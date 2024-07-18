@@ -34,12 +34,12 @@ public class AnsibleTestExecutor implements AnsibleExecutor {
 
 
     @Override
-    public void submitJob(Job savedJob)  {
+    public void submitJob(Job savedJob,String jmcRunningTime)  {
         logger.info("test submitjob invoked");
         executorService.submit(() ->{
             try {
                 preExecute(savedJob);
-                execute(savedJob);
+                execute(savedJob,jmcRunningTime);
                 savedJob.setStatus("success");
                 jobRepository.save(savedJob);
             } catch (IOException e) {
@@ -49,7 +49,7 @@ public class AnsibleTestExecutor implements AnsibleExecutor {
     }
 
     @Override
-    public ExecuteResult execute(Job job) {
+    public ExecuteResult execute(Job job, String jmcRunningTime) {
         try{
             logger.info("test execute123");
             Path outPath = ansibleUtil.getAnsibleOutPath(job.getId());

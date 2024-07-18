@@ -22,4 +22,13 @@ public class ExecutionForm {
     public void setTargets(List<String> targets) {
         this.targets = targets;
     }
+    private String jmcRunningTime;
+
+    public String getJmcRunningTime() {
+        return jmcRunningTime;
+    }
+
+    public void setJmcRunningTime(String jmcRunningTime) {
+        this.jmcRunningTime = jmcRunningTime;
+    }
 }

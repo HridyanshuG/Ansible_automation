@@ -1,40 +1,118 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <title>View Results</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" integrity="sha384-0svjQEgQWvzfU7Cp+(BsQYRjqhGMF6xGb+AzHRqpdijFoUiP7NvPPCENcqa2VbRO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">
 </head>
 <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
 <script>
     $(document).ready(() => {
-        $.ajax("http://localhost:8080/api/consoleoutput")
-            .done((data) => {
-                $("#output").html(data);
-            })
-    })
+        const jobId = $("#Jobid").text();
+        let previousStatus = null;
+        let updateOutputIntervalId;
+
+        function updateJobStatus() {
+            $.ajax(`http://localhost:8080/api/jobstatus/${jobId}`)
+                .done((data) => {
+                    if (data.status !== previousStatus) {
+                        previousStatus = data.status;
+                        let statusContent = "";
+                        if (data.status === "ongoing") {
+                            statusContent = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">ongoing</span></div>';
+                        } else if (data.status === "failed") {
+                            statusContent = '<i class="bi bi-x-circle-fill text-danger"></i> failed';
+                        } else if (data.status === "success") {
+                            statusContent = '<i class="bi bi-check-circle-fill text-success"></i> success';
+                        }
+                        $("#JobStatus").html(statusContent);
+                    }
+                });
+        }
+        function RefreshPage() {
+            $.ajax(`http://localhost:8080/api/jobstatus/${jobId}`)
+                .done((data) => {
+                        if ((data.status === "failed" || data.status === "success") && previousStatus === "ongoing") {// Stop updating output content
+                            location.reload();  // Refresh the page
+                        }
+
+                });
+        }
+
+        function updateOutputContent() {
+            $.ajax({
+                url: `http://localhost:8080/api/viewOutput/${jobId}`,
+                success: function(data) {
+                    $("#outputContent").html(data.content);
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error fetching output content:", status, error);
+                    $("#outputContent").html("Error loading content.");
+                }
+            });
+        }
+
+        updateJobStatus();
+        updateOutputIntervalId = setInterval(updateOutputContent, 1000);
+        setInterval(updateJobStatus, 3000);
+        setInterval(RefreshPage, 500);
+    });
+
+
 </script>
 <body>
-
+<div th:replace="fragments/navbar :: navbar"></div>
+<div class="container mt-3">
+<table class="table table-hover table-bordered table-sm">
+    <thead>
+    <tr>
+        <th scope="col">Id</th>
+        <th scope="col">Playbook</th>
+        <th scope="col">Target</th>
+        <th scope="col">Status</th>
+        <th scope="col">Execution Targets</th>
+        <th scope="col">Execution Time</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td id = "Jobid" th:text="${job.id}"></td>
+        <td th:text="${job.playbook}"></td>
+        <td th:text="${job.target}"></td>
+        <td id="JobStatus" th:text="${job.status}"></td>
+        <td th:text="${job.getListOfTargets()}"></td>
+        <td th:text="${job.getStartTime()}"></td>
+    </tr>
+    </tbody>
+</table>
+</div>
 <div class="container mt-3">
     <h1>V6 Ansible Automation Results</h1>
     <table class="table table-striped table-bordered">
         <thead>
         <tr>
-            <th scope="col">Artifact Type</th>
-            <th scope="col">Artifact Value</th>
+            <th scope="col">Server</th>
+            <th th:each="artifact : ${globalists}" th:text="${artifact.getType()}"></th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="job : ${globalists}">
-            <td th:text="${job.getType()}"></td>
-            <td th:text="${job.getValue()}"></td>
+        <tr th:each="server : ${servers}">
+            <td th:text="${server}"></td>
+            <td th:each="artifact : ${globalists}">
+                <a th:href="${artifact.getValueForServer(server)}" th:text="'View Result'"></a>
+            </td>
         </tr>
         </tbody>
     </table>
 </div>
-<div id="output">
-    output123
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="border border-danger p-3" style="height: 400px; overflow-y: scroll;">
+                <pre id="outputContent" class="text-center"></pre>
+            </div>
+        </div>
+    </div>
 </div>
-
 </body>
 </html>

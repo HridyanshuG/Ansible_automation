@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,23 +43,30 @@ public class AnsibleUIController {
     @PostMapping("/execute")
     public String runPlaybook(@ModelAttribute ExecutionForm request) throws IOException {
         logger.info("Starting execution of playbook successfully received request");
+        String jmcRunningTime = request.getJmcRunningTime();
+        if (jmcRunningTime == null || jmcRunningTime.isEmpty()) {
+            jmcRunningTime = "60"; // Default value if not provided
+        }
+        // Pass jmcRunningTime to the executor along with other job details
+        //ansibleExecutor.submitJob(savedJob, jmcRunningTime); // Assuming the method signature is updated to accept JMCRunningTime
+
         Job job = new Job();
         job.setPlaybook(request.getPlaybook());
         logger.info("Starting execution of playbook successfully received playbook");
         job.setTarget("inventory.ini"); //TODO move to constant INVENTORY_FILE
         String ServerNames = String.join(",", request.getTargets());
         job.setListOfTargets(ServerNames);
-        logger.info("Starting execution of playbook successfully received targets");
+        logger.info("Starting execution of playbook successfully received targets" + ServerNames);
         job.setStatus("ongoing"); //TODO move to constant  JOB_STATUS_ONGOING
         Job savedJob = jobRepository.save(job);
         logger.info("Starting execution of playbook successfully saved job");
-        ansibleExecutor.submitJob(savedJob);
-        return "redirect:/jobs/"+savedJob.getId();
+        ansibleExecutor.submitJob(savedJob,jmcRunningTime);
+        return "redirect:/ui/jobs/"+savedJob.getId();
     }
 
     @GetMapping("/playbooks")
     public String getPlaybooks(Model model) throws IOException {
-        List<String> listPlaybooks =  fileService.getFileNames(Paths.get(ansibleEnv.getRootPath(),"/playbook").toAbsolutePath().toString());
+        List<String> listPlaybooks =  fileService.getFileNames(Paths.get(AnsibleEnv.getRootPath(),"/playbook").toAbsolutePath().toString());
         model.addAttribute("playbooks", listPlaybooks);
         List<String> listInventory =  getHostsFromInventory("inventory.ini");
         model.addAttribute("inventory", listInventory);
@@ -76,21 +84,25 @@ public class AnsibleUIController {
         List<Artifacts> artifacts =  buildArtifacts(currentjob);
         jobResult.setArtifacts(artifacts);
         model.addAttribute("globalists", artifacts);
+        model.addAttribute("job", currentjob);
+        String serverNames = currentjob.getListOfTargets(); // Assuming getServerNames() returns the comma-separated string
+        List<String> serverList = Arrays.asList(serverNames.split(","));
+        model.addAttribute("servers", serverList);
         return "view_result_detail";
     }
 
     private List<Artifacts> buildArtifacts(Job job) {
         List<Artifacts> artifacts = new ArrayList<>();
-        if(job.getPlaybook().equals("jmc.yml")){
+        if(job.getPlaybook().equals("jmc.yml") && job.getStatus().equals("success")){
             Artifacts artifacts1 = new Artifacts();
-            artifacts1.setType("url");
-            artifacts1.setValue("http://localhost:8080/jmc"+job.getId()+"jmc.jfr");
-            artifacts.add(artifacts1);
-        }
-        if(job.getPlaybook().equals("toggle_totp_true.yml")){
-            Artifacts artifacts1 = new Artifacts();
-            artifacts1.setType("url");
-            artifacts1.setValue("http://localhost:8080/jmc"+job.getId()+"jmc.jfr");
+            artifacts1.setType("url for jmc");
+            String serverNames = job.getListOfTargets();
+            List<String> serverList = Arrays.asList(serverNames.split(","));
+            for (String server : serverList) {
+                String url = "http://localhost:8080/api/jmc/" + job.getId() + "/" + server;
+                artifacts1.addServerValue(server, url);
+            }
+
             artifacts.add(artifacts1);
         }
         return artifacts;

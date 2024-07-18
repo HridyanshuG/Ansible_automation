@@ -5,13 +5,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" integrity="sha384-0svjQEgQWvzfU7Cp+(BsQYRjqhGMF6xGb+AzHRqpdijFoUiP7NvPPCENcqa2VbRO" crossorigin="anonymous">
 </head>
 <body>
+<div th:replace="fragments/navbar :: navbar"></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-<header class="bg-dark text-light py-3">
-    <div class="container">
-        <h1>V6 Ansible Automation</h1>
-    </div>
-</header>
 <div class="container mt-3">
+    <h1>Job Results</h1>
     <table class="table table-hover table-bordered table-sm">
         <thead>
         <tr>
@@ -21,6 +18,7 @@
             <th scope="col">Status</th>
             <th scope="col">Execution Targets</th>
             <th scope="col">Execution Time</th>
+            <th scope="col">View Result</th>
         </tr>
         </thead>
         <tbody>
@@ -31,6 +29,9 @@
             <td th:text="${job.status}"></td>
             <td th:text="${job.getListOfTargets()}"></td>
             <td th:text="${job.getStartTime()}"></td>
+            <td>
+                <a th:href="@{/ui/jobs/{id}(id=${job.id})}" class="btn btn-primary">View</a>
+            </td>
         </tr>
         </tbody>
     </table>

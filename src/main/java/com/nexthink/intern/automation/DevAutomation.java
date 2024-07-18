@@ -31,7 +31,7 @@ public class DevAutomation implements CommandLineRunner {
 
 	public void setupValidation(){
 		String folderPath = System.getenv(AnsibleConstants.PLAYBOOK_PATH);
-		logger.info("folderPath = "+folderPath);
+		logger.info("folderPath = " + folderPath);
 		ansibleEnv.setRootPath(folderPath);
 		if(folderPath == null){
 			throw new RuntimeException(AnsibleConstants.PLAYBOOK_PATH+" environment is not setup");

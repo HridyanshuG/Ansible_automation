@@ -5,9 +5,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class AnsibleEnv {
 
-    private String rootPath;
+    private static String rootPath;
 
-    public String getRootPath() {
+    public static String getRootPath() {
         return rootPath;
     }
 

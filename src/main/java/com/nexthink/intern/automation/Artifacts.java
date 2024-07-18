@@ -1,9 +1,16 @@
 package com.nexthink.intern.automation;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Artifacts {
 
-    String type;
-    String value;
+    private String type;
+    private Map<String, String> serverValues;
+
+    public Artifacts() {
+        this.serverValues = new HashMap<>();
+    }
 
     public String getType() {
         return type;
@@ -13,11 +20,13 @@ public class Artifacts {
         this.type = type;
     }
 
-    public String getValue() {
-        return value;
+    public void addServerValue(String serverName, String value) {
+        serverValues.put(serverName, value);
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public String getValueForServer(String serverName) {
+        return serverValues.getOrDefault(serverName, "No value");
     }
+
+    // Optional: If you want to retrieve all values for all servers
 }
