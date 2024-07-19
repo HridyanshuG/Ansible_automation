@@ -20,6 +20,7 @@ import java.util.concurrent.Executors;
 
 @Component
 @Profile("prod")
+//AnsibleExecutorService is the class that will execute the ansible playbook through an interface
 public class AnsibleExecutorService implements AnsibleExecutor {
 
     private Logger logger = LoggerFactory.getLogger(AnsibleExecutorService.class);
@@ -32,6 +33,7 @@ public class AnsibleExecutorService implements AnsibleExecutor {
     @Autowired
     private AnsibleEnv ansibleEnv;
 
+    //submitJob method will submit the job to the executor service which will output if its successful or not
     @Override
     public void submitJob(Job savedJob,String jmcRunningTime) {
         executorService.submit(() -> {
